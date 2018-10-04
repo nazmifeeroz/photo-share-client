@@ -1,6 +1,6 @@
 import React from "react";
-import { Query } from "react-apollo";
-import { ROOT_QUERY } from "./App";
+import { Query, Mutation } from "react-apollo";
+import { ROOT_QUERY, ADD_FAKE_USERS_MUTATION } from "./App";
 
 const Users = () => (
   //   <Query query={ROOT_QUERY} pollInterval={5000}>
@@ -29,6 +29,13 @@ const UserList = ({ count, users, refetchUsers }) => (
     >
       Refetch
     </button>
+    <Mutation
+      mutation={ADD_FAKE_USERS_MUTATION}
+      variables={{ count: 1 }}
+      refetchQueries={[{ query: ROOT_QUERY }]}
+    >
+      {addFakeUsers => <button onClick={addFakeUsers}>Add Fake Users</button>}
+    </Mutation>
     <ul>
       {users.map(user => (
         <UserListItem
