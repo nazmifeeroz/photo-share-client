@@ -14,9 +14,9 @@ const GITHUB_AUTH_MUTATION = gql`
 
 const Me = ({ logout, requestCode, signingIn }) => (
   <Query query={ROOT_QUERY}>
-    {({ loading, data }) =>
+    {({ loading, data, refetch }) =>
       data.me ? (
-        <CurrentUser {...data.me} logout={logout} />
+        <CurrentUser {...data.me} logout={logout} refetch={refetch} />
       ) : loading ? (
         <p>loading...</p>
       ) : (
@@ -28,11 +28,18 @@ const Me = ({ logout, requestCode, signingIn }) => (
   </Query>
 );
 
-const CurrentUser = ({ name, avatar, logout }) => (
+const CurrentUser = ({ name, avatar, logout, refetch }) => (
   <div>
     <img src={avatar} width={48} height={48} alt="" />
     <h1>{name}</h1>
-    <button onClick={logout}>logout</button>
+    <button
+      onClick={() => {
+        logout();
+        refetch();
+      }}
+    >
+      logout
+    </button>
   </div>
 );
 
@@ -64,6 +71,7 @@ class AuthorizedUser extends Component {
       >
         {mutation => {
           this.githubAuthMutation = mutation;
+          console.log(localStorage.getItem("token"));
           return (
             <Me
               signingIn={this.state.signingIn}
