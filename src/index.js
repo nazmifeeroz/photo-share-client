@@ -2,7 +2,15 @@ import React from "react";
 import { render } from "react-dom";
 import App from "./App";
 import { ApolloProvider } from "react-apollo";
-import ApolloClient from "apollo-boost";
+import {
+  ApolloClient,
+  InMemoryCache,
+  HttpLink,
+  ApolloLink,
+  split
+} from "apollo-boost";
+import { WebSocketLink } from "apollo-link-ws";
+import { getMainDefinition } from "apollo-utilities";
 
 const client = new ApolloClient({
   uri: "http://localhost:4000/graphql",
