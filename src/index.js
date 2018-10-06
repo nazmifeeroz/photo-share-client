@@ -12,17 +12,42 @@ import {
 import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
 
-const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql",
-  request: operation => {
-    operation.setContext(context => ({
-      headers: {
-        ...context.headers,
-        authorization: localStorage.getItem("token")
-      }
-    }));
-  }
+const httpLink = new HttpLink({ uri: "http://localhost:4000/graphql" });
+const wsLink = new WebSocketLink({
+  uri: "ws://localhost:4000/graphql",
+  options: { reconnect: true }
 });
+const authLink = new ApolloLink((operation, forward) => {
+  operation.setContext(context => ({
+    headers: {
+      ...context.headers,
+      authorization: localStorage.getItem("token")
+    }
+  }));
+  return forward(operation);
+});
+const httpAuthLink = authLink.concat(httpLink);
+const link = split(
+  ({ query }) => {
+    const { kind, operation } = getMainDefinition(query);
+    return kind === "OperationDefinition" && operation === "subscription";
+  },
+  wsLink,
+  httpAuthLink
+);
+
+const client = new ApolloClient({ cache, link });
+// const client = new ApolloClient({
+//   uri: "http://localhost:4000/graphql",
+//   request: operation => {
+//     operation.setContext(context => ({
+//       headers: {
+//         ...context.headers,
+//         authorization: localStorage.getItem("token")
+//       }
+//     }));
+//   }
+// });
 
 render(
   <ApolloProvider client={client}>
